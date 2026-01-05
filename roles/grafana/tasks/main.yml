@@ -1,0 +1,74 @@
+---
+# 1) Create Grafana directories
+- name: Create Grafana directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/monitoring/grafana
+    - /opt/monitoring/grafana/provisioning
+    - /opt/monitoring/grafana/provisioning/datasources
+    - /opt/monitoring/grafana/provisioning/dashboards
+    - /opt/monitoring/grafana/dashboards
+    - /opt/monitoring/grafana/data
+  become: true
+
+
+# 2) Render Grafana datasource
+- name: Render Grafana datasource
+  template:
+    src: datasource.yml.j2
+    dest: /opt/monitoring/grafana/provisioning/datasources/prometheus.yml
+    mode: "0644"
+  become: true
+
+
+# 3) Render Grafana dashboard provider
+- name: Render Grafana dashboard provider
+  template:
+    src: dashboard-provider.yml.j2
+    dest: /opt/monitoring/grafana/provisioning/dashboards/default.yml
+    mode: "0644"
+  become: true
+
+
+# 4) Copy Node Exporter dashboard
+- name: Copy Node Exporter dashboard
+  copy:
+    src: node-exporter-dashboard.json
+    dest: /opt/monitoring/grafana/dashboards/node-exporter.json
+    mode: "0644"
+  become: true
+
+
+# 5) Pull Grafana image
+- name: Pull Grafana image
+  containers.podman.podman_image:
+    name: grafana/grafana
+    tag: 10.4.2
+
+
+- name: Set ownership for Grafana data directory
+  file:
+    path: /opt/monitoring/grafana/data
+    owner: 472
+    group: 472
+    recurse: yes
+  become: true
+
+
+# 6) Run Grafana container (FIXED)
+- name: Run Grafana container
+  containers.podman.podman_container:
+    name: grafana
+    image: grafana/grafana:10.4.2
+    state: started
+    restart_policy: always
+    network: host
+    volumes:
+      - /opt/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
+      - /opt/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
+      - /opt/monitoring/grafana/data:/var/lib/grafana:Z
+  become: true
+

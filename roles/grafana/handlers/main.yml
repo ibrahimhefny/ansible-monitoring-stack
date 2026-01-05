@@ -1,0 +1,11 @@
+---
+- name: Restart Grafana
+  containers.podman.podman_container:
+    name: grafana
+    state: stopped
+
+- name: Start Grafana
+  containers.podman.podman_container:
+    name: grafana
+    state: started
+

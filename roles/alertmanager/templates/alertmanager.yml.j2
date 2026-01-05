@@ -1,0 +1,19 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'telegram-alerts'
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 5m
+
+receivers:
+- name: 'telegram-alerts'
+  telegram_configs:
+  - bot_token: '8573826755:AAH0u5-THDo9_nVrVv0-yOF17Kpi1bc3S8A'
+    chat_id: 962719835
+    message: |
+      🚨 ALERT FIRED 🚨
+      A monitoring alert has been triggered.
+      Please check Alertmanager for details.
+

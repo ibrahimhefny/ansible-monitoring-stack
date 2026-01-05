@@ -1,0 +1,31 @@
+---
+- name: Common setup
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Node Exporter
+  hosts: nodes
+  become: true
+  roles:
+    - node_exporter
+
+- name: Prometheus
+  hosts: control
+  become: true
+  roles:
+    - prometheus
+
+- name: Grafana
+  hosts: control
+  become: true
+  roles:
+    - grafana
+
+- name: Alertmanager
+  hosts: control
+  become: true
+  roles:
+    - alertmanager
+

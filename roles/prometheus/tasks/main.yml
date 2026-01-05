@@ -1,0 +1,48 @@
+---
+# 1) Create Prometheus directories
+- name: Create Prometheus directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/monitoring/prometheus
+    - /opt/monitoring/prometheus/data
+    - /opt/monitoring/prometheus/alerts
+  become: true
+
+
+# 2) Render Prometheus configuration
+- name: Render Prometheus config
+  template:
+    src: prometheus.yml.j2
+    dest: /opt/monitoring/prometheus/prometheus.yml
+    mode: "0644"
+  become: true
+
+
+# 3) Pull Prometheus image
+- name: Pull Prometheus image
+  containers.podman.podman_image:
+    name: quay.io/prometheus/prometheus
+    tag: v2.51.2
+
+
+# 4) Run Prometheus container (FIXED)
+- name: Run Prometheus container
+  containers.podman.podman_container:
+    name: prometheus
+    image: quay.io/prometheus/prometheus:v2.51.2
+    state: started
+    restart_policy: always
+    network: host
+    volumes:
+      - /opt/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - /opt/monitoring/prometheus/alerts:/etc/prometheus/alerts:ro,Z
+      - /opt/monitoring/prometheus/data:/prometheus:Z
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.listen-address=0.0.0.0:9090"
+  become: true
+

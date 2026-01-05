@@ -1,0 +1,17 @@
+---
+- name: Pull Node Exporter image
+  containers.podman.podman_image:
+    name: quay.io/prometheus/node-exporter
+    tag: v1.8.1
+
+- name: Run Node Exporter container
+  containers.podman.podman_container:
+    name: node_exporter
+    image: quay.io/prometheus/node-exporter:v1.8.1
+    state: started
+    restart_policy: always
+    network: host
+    command: "--path.rootfs=/host"
+    volumes:
+      - /:/host:ro,rslave
+

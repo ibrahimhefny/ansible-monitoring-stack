@@ -1,0 +1,7 @@
+*.retry
+*.log
+.vagrant/
+.env
+inventory.ini
+hosts
+

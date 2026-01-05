@@ -1,0 +1,39 @@
+---
+- name: Create Alertmanager directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/monitoring/alertmanager
+    - /opt/monitoring/alertmanager/data
+  become: true
+
+- name: Render Alertmanager config
+  template:
+    src: alertmanager.yml.j2
+    dest: /opt/monitoring/alertmanager/alertmanager.yml
+    mode: "0644"
+  become: true
+
+- name: Pull Alertmanager image
+  containers.podman.podman_image:
+    name: quay.io/prometheus/alertmanager
+    tag: v0.27.0
+
+- name: Run Alertmanager container
+  containers.podman.podman_container:
+    name: alertmanager
+    image: quay.io/prometheus/alertmanager:v0.27.0
+    state: started
+    restart_policy: always
+    network: host
+    volumes:
+      - /opt/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - /opt/monitoring/alertmanager/data:/alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+      - "--web.listen-address=0.0.0.0:9093"
+  become: true
+

@@ -1,0 +1,11 @@
+---
+- name: Restart Alertmanager
+  containers.podman.podman_container:
+    name: alertmanager
+    state: stopped
+
+- name: Start Alertmanager
+  containers.podman.podman_container:
+    name: alertmanager
+    state: started
+

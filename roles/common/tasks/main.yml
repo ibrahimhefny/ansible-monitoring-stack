@@ -1,0 +1,19 @@
+---
+- name: Install basic packages (RedHat)
+  dnf:
+    name:
+      - curl
+      - vim
+      - git
+      - ca-certificates
+    state: present
+    lock_timeout: 60
+  become: true
+
+- name: Install Podman (RedHat)
+  dnf:
+    name: podman
+    state: present
+    lock_timeout: 60
+  become: true
+
